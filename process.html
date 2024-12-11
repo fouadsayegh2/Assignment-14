@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Company Search Results</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f9f9f9;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+      line-height: 1.6;
+    }
+    
+    h1 {
+      text-align: center;
+      color: #444;
+    }
+    
+    #results {
+      margin-top: 20px;
+    }
+    
+    #loading {
+      font-style: italic;
+      color: gray;
+      text-align: center;
+    }
+    
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    
+    li {
+      background-color: #ffffff;
+      margin: 15px 0;
+      padding: 15px;
+      border-left: 5px solid #007BFF;
+      border-radius: 4px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    a {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      text-decoration: none;
+      color: #007BFF;
+    }
+    
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h1>Company Search Results</h1>
+  
+  <div id="results">
+    <p id="loading">Loading search results, please wait...</p>
+  </div>
+  
+  <a href="/">&larr; Return to Home</a>
+
+  <script>
+    function renderCompanies(companies) {
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '';
+      
+      if (companies.length > 0) {
+        const list = document.createElement('ul');
+        companies.forEach(company => {
+          const listItem = document.createElement('li');
+          listItem.innerHTML = `
+            <strong>Name:</strong> ${company.name} <br>
+            <strong>Ticker:</strong> ${company.ticker} <br>
+            <strong>Price:</strong> $${company.price.toFixed(2)}
+          `;
+          list.appendChild(listItem);
+        });
+        resultsDiv.appendChild(list);
+      } else {
+        resultsDiv.innerHTML = '<p>No matching companies found.</p>';
+      }
+    }
+
+    function fetchResults() {
+      fetch(window.location.href)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          renderCompanies(data.companies);
+        })
+        .catch(error => {
+          console.error("Error fetching results:", error);
+          document.getElementById('results').innerHTML = '<p>An error occurred while fetching results. Please try again later.</p>';
+        });
+    }
+
+    fetchResults();
+  </script>
+</body>
+</html>
