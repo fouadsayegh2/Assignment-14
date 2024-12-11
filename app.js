@@ -9,7 +9,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 mongoose
-  .connect('mongodb+srv://fouadsayegh:Fouad2005!@stock.uz7in.mongodb.net/?retryWrites=true&w=majority&appName=Stock', {
+  .connect('mongodb+srv://fouadsayegh:Fouad2005!@stock.uz7in.mongodb.net/Stock?retryWrites=true&w=majority&appName=Stock', {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
