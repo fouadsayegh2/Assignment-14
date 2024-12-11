@@ -1,81 +1,87 @@
+// Required modules
 const express = require('express');
 const mongoose = require('mongoose');
 
+// Initialize express app
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Middleware to parse URL-encoded data and serve static files
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public')); 
-// Ensure "public/index.html" exists
+app.use(express.static('public'));
 
-// MongoDB Connection
-mongoose
-  .connect('mongodb+srv://fouadsayegh:Fouad2005!@stock.uz7in.mongodb.net/Stock?retryWrites=true&w=majority&appName=Stock', {
-    useNewUrlParser: true,
-  })
-  .then(() => console.log("Connected to MongoDB"))
-  .catch((err) => console.error("MongoDB connection error:", err));
+// Connect to MongoDB
+mongoose.connect('mongodb+srv://fouadsayegh:Fouad2005!@stock.uz7in.mongodb.net/Stock?retryWrites=true&w=majority&appName=Stock', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => console.log('Connected to MongoDB successfully'))
+.catch((err) => console.error('Error connecting to MongoDB:', err));
 
-// Define Schema
+// Define Mongoose schema and model for "PublicCompanies"
 const companySchema = new mongoose.Schema({
   name: String,
   ticker: String,
   price: Number,
 });
+
 const Company = mongoose.model('PublicCompanies', companySchema, 'PublicCompanies');
 
-
-// Home (form)
+// Route to serve homepage with form
 app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/public/index.html'); // Ensure "public/index.html" exists
+  res.sendFile(__dirname + '/public/index.html'); // Ensure "public/index.html" is present
 });
 
-// Process (handles form submission and database query)
+// Route to process form submissions and query the database
 app.get('/process', async (req, res) => {
   const { searchBy, search } = req.query;
 
+  // Validate request parameters
   if (!searchBy || !search) {
-    res.writeHead(400, { 'Content-Type': 'text/html' });
-    res.write("Error: Missing search parameters.");
-    return res.end();
+    return res.status(400).send("Error: Missing search parameters.");
   }
 
-  console.log("SearchBy:", searchBy);
-  console.log("Search:", search);
+  console.log(`SearchBy: ${searchBy}`);
+  console.log(`Search: ${search}`);
 
-  let query = {};
-  if (searchBy === 'name') {
-    query = { name: { $regex: search, $options: 'i' } }; // Case-insensitive search for name
-  } else if (searchBy === 'ticker') {
-    query = { ticker: { $regex: search, $options: 'i' } }; // Case-insensitive search for ticker
-  }
+  // Build query dynamically
+  const query = searchBy === 'name' 
+    ? { name: new RegExp(search, 'i') }  // Case-insensitive regex search by name
+    : searchBy === 'ticker' 
+    ? { ticker: new RegExp(search, 'i') } // Case-insensitive regex search by ticker
+    : {};
 
-  console.log("Constructed Query:", query);
+  console.log('Generated Query:', query);
 
   try {
     const companies = await Company.find(query);
-    console.log("Query Results:", companies);
-
+    
     res.writeHead(200, { 'Content-Type': 'text/html' });
-    res.write("<h1>Search Results:</h1>");
+    res.write("<h1>Search Results</h1>");
+
     if (companies.length > 0) {
-      companies.forEach(company => {
-        res.write(`<p>Name: ${company.name}, Ticker: ${company.ticker}, Price: $${company.price}</p>`);
-      });
+      const companyHTML = companies.map(company => 
+        `<div style='margin-bottom: 10px; padding: 10px; border: 1px solid #ddd;'>
+          <strong>Name:</strong> ${company.name} <br>
+          <strong>Ticker:</strong> ${company.ticker} <br>
+          <strong>Price:</strong> $${company.price.toFixed(2)}
+        </div>`
+      ).join('');
+      res.write(companyHTML);
     } else {
       res.write("<p>No matching companies found.</p>");
     }
-    res.write('<a href="/">Back to Home</a>');
+
+    res.write('<br><a href="/">Return to Home</a>');
     res.end();
+
   } catch (error) {
-    console.error("Error fetching companies:", error);
-    res.writeHead(500, { 'Content-Type': 'text/html' });
-    res.write("Internal Server Error");
-    res.end();
+    console.error('Error retrieving companies:', error);
+    res.status(500).send("Internal Server Error");
   }
 });
 
-// Start the server
+// Start server and listen on defined port
 app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+  console.log(`Server is running and accessible at http://localhost:${port}`);
 });
