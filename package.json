@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node app.js"
   },
-  "author": "Your Name",
+  "author": "Fouad Sayegh",
   "license": "MIT",
   "dependencies": {
     "express": "^4.21.2",
