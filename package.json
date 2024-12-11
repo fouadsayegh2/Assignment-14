@@ -4,15 +4,12 @@
   "description": "A stock ticker web app created with Node.js",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
+    "start": "node app.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/fouadsayegh2/Assignment-14.git"
-  },
-  "author": "Fouad Sayegh",
+  "author": "Your Name",
+  "license": "MIT",
   "dependencies": {
     "express": "^4.21.2",
     "mongoose": "^8.8.4"
-  },
+  }
 }
