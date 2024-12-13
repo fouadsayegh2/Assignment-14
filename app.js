@@ -1,16 +1,12 @@
-// Required modules
 const express = require('express');
 const mongoose = require('mongoose');
 
-// Initialize express app
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Middleware to parse URL-encoded data and serve static files
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-// Connect to MongoDB
 mongoose.connect('mongodb+srv://fouadsayegh:Fouad2005!@stock.uz7in.mongodb.net/Stock?retryWrites=true&w=majority&appName=Stock', {
   useNewUrlParser: true,
   useUnifiedTopology: true
@@ -18,7 +14,6 @@ mongoose.connect('mongodb+srv://fouadsayegh:Fouad2005!@stock.uz7in.mongodb.net/S
 .then(() => console.log('Connected to MongoDB successfully'))
 .catch((err) => console.error('Error connecting to MongoDB:', err));
 
-// Define Mongoose schema and model for "PublicCompanies"
 const companySchema = new mongoose.Schema({
   name: String,
   ticker: String,
@@ -27,16 +22,13 @@ const companySchema = new mongoose.Schema({
 
 const Company = mongoose.model('PublicCompanies', companySchema, 'PublicCompanies');
 
-// Route to serve homepage with form
 app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/public/index.html'); // Ensure "public/index.html" is present
+  res.sendFile(__dirname + '/public/index.html');
 });
 
-// Route to process form submissions and query the database
 app.get('/process', async (req, res) => {
   const { searchBy, search } = req.query;
 
-  // Validate request parameters
   if (!searchBy || !search) {
     return res.status(400).send("Error: Missing search parameters.");
   }
@@ -46,9 +38,9 @@ app.get('/process', async (req, res) => {
 
   // Build query dynamically
   const query = searchBy === 'name' 
-    ? { name: new RegExp(search, 'i') }  // Case-insensitive regex search by name
+    ? { name: new RegExp(search, 'i') }
     : searchBy === 'ticker' 
-    ? { ticker: new RegExp(search, 'i') } // Case-insensitive regex search by ticker
+    ? { ticker: new RegExp(search, 'i') }
     : {};
 
   console.log('Generated Query:', query);
@@ -81,7 +73,6 @@ app.get('/process', async (req, res) => {
   }
 });
 
-// Start server and listen on defined port
 app.listen(port, () => {
   console.log(`Server is running and accessible at http://localhost:${port}`);
 });
